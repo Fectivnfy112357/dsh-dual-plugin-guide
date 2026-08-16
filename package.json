@@ -1,0 +1,40 @@
+{
+  "name": "dsh-plugin-guide",
+  "version": "0.1.0",
+  "description": "Dual-format plugin development guide: teaches agents to build plugins compatible with both the DSH static plugin package (installable via dsh plugin --profile add) and Agent Plugins 1.0 (plugin.json + skills/). Ships as an Agent Plugins 1.0 plugin, a standard agent skill, and a dsh plugin (dsh.bundle.patch registers the skill at runtime).",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "skills",
+    "cordis.patch.yml",
+    "plugin.json",
+    "README.md",
+    "README_zh.md",
+    "LICENSE"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Fectivnfy112357/dsh-plugin-guide.git"
+  },
+  "keywords": [
+    "deepseek",
+    "dsh",
+    "dsh-plugin",
+    "agent-plugins",
+    "dual-format",
+    "plugin",
+    "guide",
+    "skill"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}
