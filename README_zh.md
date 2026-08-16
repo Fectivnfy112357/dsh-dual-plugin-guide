@@ -12,11 +12,12 @@
 
 ```bash
 # DSH —— 把指导技能注册进 agent 技能目录
-dsh plugin --profile web add <git-url|path|npm-name>
+dsh plugin --profile web add github:Fectivnfy112357/dsh-plugin-guide
 
-# Agent Plugins 1.0 —— 让兼容客户端指向本目录，或发布它
+# Agent Plugins 1.0 —— 让兼容客户端指向本仓库，或发布它
+#   https://github.com/Fectivnfy112357/dsh-plugin-guide
 # 标准 skills
-npx skills add <path|git-url>
+npx skills add Fectivnfy112357/dsh-plugin-guide
 ```
 
 DSH 安装并重启 profile 后，`dsh-plugin-guide` 技能会出现在 agent 的技能目录里；agent 会按它来构建双格式插件。包内自带的 `skills/dsh-plugin-guide/scripts/scaffold.mjs` 一条命令即可生成合法双格式骨架。

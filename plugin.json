@@ -13,10 +13,18 @@
   "keywords": [
     "deepseek",
     "dsh",
+    "deepseek-harness",
+    "harness",
+    "cordis",
     "dsh-plugin",
-    "agent-plugins",
-    "dual-format",
     "plugin",
-    "guide"
+    "plugin-development",
+    "agent-plugins",
+    "agent-plugin",
+    "agent-skills",
+    "skills",
+    "dual-format",
+    "guide",
+    "meta"
   ]
 }

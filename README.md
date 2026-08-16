@@ -13,11 +13,12 @@ Not DSH-only: this package itself installs through both formats.
 
 ```bash
 # DSH — register the guidance skill into the agent catalog
-dsh plugin --profile web add <git-url|path|npm-name>
+dsh plugin --profile web add github:Fectivnfy112357/dsh-plugin-guide
 
-# Agent Plugins 1.0 — point a compatible client at this directory, or publish it
+# Agent Plugins 1.0 — point a compatible client at the repo, or publish it
+#   https://github.com/Fectivnfy112357/dsh-plugin-guide
 # Standard skills
-npx skills add <path|git-url>
+npx skills add Fectivnfy112357/dsh-plugin-guide
 ```
 
 After the DSH install and a profile restart, the `dsh-plugin-guide` skill shows

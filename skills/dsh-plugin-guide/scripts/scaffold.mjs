@@ -59,10 +59,16 @@ const files = {
   "keywords": [
     "deepseek",
     "dsh",
+    "deepseek-harness",
+    "cordis",
     "dsh-plugin",
+    "plugin",
+    "plugin-development",
     "agent-plugins",
+    "agent-skills",
+    "skills",
     "dual-format",
-    "skill"
+    "guide"
   ],
   "dsh": {
     "bundle": {
@@ -80,10 +86,16 @@ const files = {
   "keywords": [
     "deepseek",
     "dsh",
+    "deepseek-harness",
+    "cordis",
     "dsh-plugin",
+    "plugin",
+    "plugin-development",
     "agent-plugins",
+    "agent-skills",
+    "skills",
     "dual-format",
-    "skill"
+    "guide"
   ]
 }
 `,
