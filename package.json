@@ -1,5 +1,5 @@
 {
-  "name": "dsh-plugin-guide",
+  "name": "dsh-dual-plugin-guide",
   "version": "0.1.0",
   "description": "Dual-format plugin development guide: teaches agents to build plugins compatible with both the DSH static plugin package (installable via dsh plugin --profile add) and Agent Plugins 1.0 (plugin.json + skills/). Ships as an Agent Plugins 1.0 plugin, a standard agent skill, and a dsh plugin (dsh.bundle.patch registers the skill at runtime).",
   "type": "module",
@@ -28,7 +28,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Fectivnfy112357/dsh-plugin-guide.git"
+    "url": "git+https://github.com/Fectivnfy112357/dsh-dual-plugin-guide.git"
   },
   "keywords": [
     "deepseek",

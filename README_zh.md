@@ -1,4 +1,4 @@
-# dsh-plugin-guide
+# dsh-dual-plugin-guide
 
 **双格式插件开发指导。** 本插件指导 agent 构建**同时兼容两个生态**的插件，单一目录搞定：
 
@@ -12,25 +12,25 @@
 
 ```bash
 # DSH —— 把指导技能注册进 agent 技能目录
-dsh plugin --profile web add github:Fectivnfy112357/dsh-plugin-guide
+dsh plugin --profile web add github:Fectivnfy112357/dsh-dual-plugin-guide
 
 # Agent Plugins 1.0 —— 让兼容客户端指向本仓库，或发布它
-#   https://github.com/Fectivnfy112357/dsh-plugin-guide
+#   https://github.com/Fectivnfy112357/dsh-dual-plugin-guide
 # 标准 skills
-npx skills add Fectivnfy112357/dsh-plugin-guide
+npx skills add Fectivnfy112357/dsh-dual-plugin-guide
 ```
 
-DSH 安装并重启 profile 后，`dsh-plugin-guide` 技能会出现在 agent 的技能目录里；agent 会按它来构建双格式插件。包内自带的 `skills/dsh-plugin-guide/scripts/scaffold.mjs` 一条命令即可生成合法双格式骨架。
+DSH 安装并重启 profile 后，`dsh-dual-plugin-guide` 技能会出现在 agent 的技能目录里；agent 会按它来构建双格式插件。包内自带的 `skills/dsh-dual-plugin-guide/scripts/scaffold.mjs` 一条命令即可生成合法双格式骨架。
 
 ## 结构
 
 ```
-dsh-plugin-guide/
+dsh-dual-plugin-guide/
 ├── package.json       # "dsh": {"bundle": {"patch": "./cordis.patch.yml"}}
 ├── plugin.json        # Agent Plugins 1.0 清单
-├── cordis.patch.yml   # dsh bundle 插入行 (id: dsh-plugin-guide-skill)
-├── lib/index.js       # Cordis 入口：把 skills/dsh-plugin-guide/SKILL.md 注册进 ctx.skills
-└── skills/dsh-plugin-guide/
+├── cordis.patch.yml   # dsh bundle 插入行 (id: dsh-dual-plugin-guide-skill)
+├── lib/index.js       # Cordis 入口：把 skills/dsh-dual-plugin-guide/SKILL.md 注册进 ctx.skills
+└── skills/dsh-dual-plugin-guide/
     ├── SKILL.md       # 指导正文（唯一内容源）
     ├── references/    # 已核实事实库（事件/服务/Slot/工具/打包/Agent Plugins）
     └── scripts/       # scaffold.mjs —— 双格式骨架生成器
@@ -38,7 +38,7 @@ dsh-plugin-guide/
 
 ## 工作原理
 
-`lib/index.js` 是一个极简 Cordis 插件（`inject: ['skills']`）：读取 `skills/dsh-plugin-guide/SKILL.md`（Agent Skills 格式）并通过 `resourceBase` 注册进 `ctx.skills`，相对引用可正常解析。同一个 `skills/` 目录同时被 Agent Plugins 客户端和 `npx skills` 读取——一份内容源，三套加载器。
+`lib/index.js` 是一个极简 Cordis 插件（`inject: ['skills']`）：读取 `skills/dsh-dual-plugin-guide/SKILL.md`（Agent Skills 格式）并通过 `resourceBase` 注册进 `ctx.skills`，相对引用可正常解析。同一个 `skills/` 目录同时被 Agent Plugins 客户端和 `npx skills` 读取——一份内容源，三套加载器。
 
 ## License
 

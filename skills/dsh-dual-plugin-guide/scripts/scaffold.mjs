@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * dsh-plugin-guide scaffold generator.
+ * dsh-dual-plugin-guide scaffold generator.
  *
  * Generates a valid dual-format plugin skeleton (DSH static plugin package +
  * Agent Plugins 1.0) into a target directory:

@@ -1,6 +1,6 @@
 # 参考文献库目录（references/）
 
-> 本分册是"双格式指导插件 `dsh-plugin-guide`"的**已核实事实库**，教 agent 构建
+> 本分册是"双格式指导插件 `dsh-dual-plugin-guide`"的**已核实事实库**，教 agent 构建
 > 同时兼容 DSH 静态插件包 与 Agent Plugins 1.0 两种格式的插件。
 > 正文中文；代码 / API 名 / 事件名 / 命令保留原文逐字抄录。
 >

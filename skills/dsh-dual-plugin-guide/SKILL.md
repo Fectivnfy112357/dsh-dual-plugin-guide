@@ -1,12 +1,12 @@
 ---
-name: dsh-plugin-guide
+name: dsh-dual-plugin-guide
 description: 构建/修改/调试 DSH（DeepSeek Harness / Cordis）插件的完整开发指导，并产出 Agent Plugins 1.0 双格式插件（plugin.json + skills/），可经 dsh plugin --profile add 安装。覆盖动态 Cordis 插件、静态插件包、事件与 hook、Slots、Services、动态 Tool、打包发布、双格式布局与验证。当用户提到 dsh 插件、deepseek-harness 插件、cordis 插件、agent plugin、plugin.json、双格式/dual-format 插件、dsh plugin --profile add、技能打包分发时使用本技能，即使他们没有明确说出"插件"或"指导"。
 whenToUse: 用户请求创建/修改/调试 DSH 插件，或需要产出可同时通过 DSH（dsh plugin --profile add）与 Agent Plugins 1.0 生态安装的插件包。
 ---
 
-# dsh-plugin-guide — 双格式插件开发指导
+# dsh-dual-plugin-guide — 双格式插件开发指导
 
-本技能指导 agent 构建 DSH（DeepSeek Harness，Cordis 内核）插件，并默认产出**双格式**结果：同一个目录既是 DSH 静态插件包，也是 Agent Plugins 1.0 包。本技能自身就是这种双格式结构（`package.json` + `plugin.json` + `cordis.patch.yml` + `lib/index.js` + `skills/dsh-plugin-guide/`），安装方式见 README。
+本技能指导 agent 构建 DSH（DeepSeek Harness，Cordis 内核）插件，并默认产出**双格式**结果：同一个目录既是 DSH 静态插件包，也是 Agent Plugins 1.0 包。本技能自身就是这种双格式结构（`package.json` + `plugin.json` + `cordis.patch.yml` + `lib/index.js` + `skills/dsh-dual-plugin-guide/`），安装方式见 README。
 
 ## 核心原则
 
@@ -126,7 +126,7 @@ dsh plugin --profile <profile> add <git-url|path|npm-name>
 - `npm pack --dry-run` 确认发布内容包含 `lib/`、`skills/`、`cordis.patch.yml`、`plugin.json`
 - `plugin.json` 的 name 与 npm 包名一致或至少不冲突
 - 技能正文里的相对引用（references/、scripts/）能经 resourceBase 解析
-- 发布前跑自检：`node skills/dsh-plugin-guide/scripts/verify.mjs`（关键文件 + 身份一致性 + 相对链接）
+- 发布前跑自检：`node skills/dsh-dual-plugin-guide/scripts/verify.mjs`（关键文件 + 身份一致性 + 相对链接）
 
 ## 常见错误与排查
 
@@ -143,7 +143,7 @@ dsh plugin --profile <profile> add <git-url|path|npm-name>
 | 装了旧版官方包 | npm `latest` 标签过期（如 dsh-tools latest=0.0.1-rc.1）——显式钉 `next` 标签版本（packaging.md §8） |
 | 产物含 `./x.ts` 导入、ESM 崩溃 | tsconfig 缺 `rewriteRelativeImportExtensions`（packaging.md §9） |
 
-> 发布前跑 `node skills/dsh-plugin-guide/scripts/verify.mjs` 自检；参考实现见 references/ecosystem.md；事实来源与核验日期见 references/sources.md。
+> 发布前跑 `node skills/dsh-dual-plugin-guide/scripts/verify.mjs` 自检；参考实现见 references/ecosystem.md；事实来源与核验日期见 references/sources.md。
 
 ## references/ 目录
 

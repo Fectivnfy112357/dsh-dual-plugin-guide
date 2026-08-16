@@ -10,12 +10,12 @@
 ```json
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
-  "name": "dsh-plugin-guide",
+  "name": "dsh-dual-plugin-guide",
   "version": "0.1.0",
   "description": "…双格式插件开发指导…",
   "author": { "name": "贾晓源 (Fectivnfy112357)", "url": "https://github.com/Fectivnfy112357" },
-  "homepage": "https://github.com/Fectivnfy112357/dsh-plugin-guide",
-  "repository": "https://github.com/Fectivnfy112357/dsh-plugin-guide",
+  "homepage": "https://github.com/Fectivnfy112357/dsh-dual-plugin-guide",
+  "repository": "https://github.com/Fectivnfy112357/dsh-dual-plugin-guide",
   "license": "MIT",
   "keywords": ["deepseek", "dsh", "dsh-plugin", "agent-plugins", "dual-format", "plugin", "guide"]
 }
@@ -58,7 +58,7 @@ whenToUse: 用户请求…
 
 ## 4. 反向域名命名空间
 
-插件 `name`（及技能名）采用**反向域名风格命名空间**：小写 + 点分/连字符，如 `dsh-plugin-guide`、`com.example.my-plugin`。
+插件 `name`（及技能名）采用**反向域名风格命名空间**：小写 + 点分/连字符，如 `dsh-dual-plugin-guide`、`com.example.my-plugin`。
 规则同上：小写字母数字 + `-`/`.`，禁 `--`/`..`/大写。作用：跨生态避免插件/技能名冲突，且与 npm 命名空间一致。
 
 ## 5. 与 DSH 的对应关系

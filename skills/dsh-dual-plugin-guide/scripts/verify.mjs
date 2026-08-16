@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * verify.mjs — dsh-plugin-guide 双格式产物自检脚本。
+ * verify.mjs — dsh-dual-plugin-guide 双格式产物自检脚本。
  *
  * 吸收自社区 verify-kit 的校验思路，裁剪为不依赖官方 checkout 的三层：
  *   1. 关键路径存在清单（双格式产物）
