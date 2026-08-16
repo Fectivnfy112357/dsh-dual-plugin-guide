@@ -11,10 +11,12 @@
 ## 安装
 
 ```bash
-# DSH —— 把指导技能注册进 agent 技能目录
-dsh plugin --profile web add github:Fectivnfy112357/dsh-dual-plugin-guide
+# DSH —— 把指导技能注册进 agent 技能目录（选一种来源）
+dsh plugin --profile web add dsh-dual-plugin-guide                          # npm（推荐）
+dsh plugin --profile web add github:Fectivnfy112357/dsh-dual-plugin-guide   # GitHub
 
-# Agent Plugins 1.0 —— 让兼容客户端指向本仓库，或发布它
+# Agent Plugins 1.0 —— 让兼容客户端指向 npm 包或本仓库：
+#   https://www.npmjs.com/package/dsh-dual-plugin-guide
 #   https://github.com/Fectivnfy112357/dsh-dual-plugin-guide
 # 标准 skills
 npx skills add Fectivnfy112357/dsh-dual-plugin-guide

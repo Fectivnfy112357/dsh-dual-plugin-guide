@@ -12,10 +12,12 @@ Not DSH-only: this package itself installs through both formats.
 ## Install
 
 ```bash
-# DSH — register the guidance skill into the agent catalog
-dsh plugin --profile web add github:Fectivnfy112357/dsh-dual-plugin-guide
+# DSH — register the guidance skill into the agent catalog (pick one source)
+dsh plugin --profile web add dsh-dual-plugin-guide                          # npm (recommended)
+dsh plugin --profile web add github:Fectivnfy112357/dsh-dual-plugin-guide   # GitHub
 
-# Agent Plugins 1.0 — point a compatible client at the repo, or publish it
+# Agent Plugins 1.0 — point a compatible client at the npm package or the repo:
+#   https://www.npmjs.com/package/dsh-dual-plugin-guide
 #   https://github.com/Fectivnfy112357/dsh-dual-plugin-guide
 # Standard skills
 npx skills add Fectivnfy112357/dsh-dual-plugin-guide
