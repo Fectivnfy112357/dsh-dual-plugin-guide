@@ -14,7 +14,7 @@
  *
  * No dependencies — plain Node ESM.
  */
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 
 const NAME_PATTERN = /^(?!.*(?:--|\.\.))[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/;
@@ -155,7 +155,10 @@ export function apply(ctx) {
     return;
   }
   const content = raw.replace(/^---\\r?\\n[\\s\\S]*?\\r?\\n---\\r?\\n?/, '').trimStart();
-  const disposer = ctx.skills.register({
+  ctx.logger.info('__NAME__: registered skill "%s"', meta.name);
+  // 注册即 effect：register() 返回的 disposer 由框架在插件卸载时自动调用，
+  // 无需手动挂 dispose 钩子（Cordis 惯用法）。
+  ctx.effect(() => ctx.skills.register({
     name: meta.name,
     description: meta.description,
     ...(meta.whenToUse ? { whenToUse: meta.whenToUse } : {}),
@@ -165,11 +168,7 @@ export function apply(ctx) {
       kind: 'directory',
       path: fileURLToPath(SKILL_DIR),
     },
-  });
-  ctx.logger.info('__NAME__: registered skill "%s"', meta.name);
-  ctx.on('dispose', () => {
-    if (typeof disposer === 'function') disposer();
-  });
+  }));
 }
 `,
   'skills/__NAME__/SKILL.md': `---
@@ -235,10 +234,22 @@ for (const [rel, content] of Object.entries(files)) {
   writeFileSync(out, content.replaceAll('__NAME__', name), 'utf-8');
 }
 
+// 复制自检脚本到生成产物（生成 + 自检闭环）：产物可直接跑
+//   node skills/<name>/scripts/verify.mjs
+// 做双格式产物完整性校验（关键文件 / 身份一致性 / 相对链接）。
+const verifySrc = new URL('./verify.mjs', import.meta.url);
+if (existsSync(verifySrc)) {
+  const verifyOut = join(target, 'skills', name, 'scripts', 'verify.mjs');
+  mkdirSync(dirname(verifyOut), { recursive: true });
+  copyFileSync(verifySrc, verifyOut);
+  console.log('  + skills/' + name + '/scripts/verify.mjs (self-check copied)');
+}
+
 console.log(`scaffolded dual-format plugin "${name}" at ${target}`);
 console.log('');
 console.log('next steps:');
 console.log(`  1. edit skills/${name}/SKILL.md — the single source of content`);
-console.log('  2. DSH install:      dsh plugin --profile <profile> add ' + target);
-console.log(`  3. Agent Plugins:    point a compatible client at ${target}`);
-console.log('  4. Standard skills:  npx skills add ' + target);
+console.log(`  2. self-check:    node skills/${name}/scripts/verify.mjs`);
+console.log('  3. DSH install:  dsh plugin --profile <profile> add ' + target);
+console.log(`  4. Agent Plugins: point a compatible client at ${target}`);
+console.log('  5. Standard skills: npx skills add ' + target);

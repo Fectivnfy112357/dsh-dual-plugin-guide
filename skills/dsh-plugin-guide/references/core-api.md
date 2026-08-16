@@ -107,3 +107,18 @@ export function apply(ctx) {
   // ctx 注册自动随 fiber 清理；无需手动 undo
 }
 ```
+
+## 9. 官方红线（门禁级契约）
+
+> 来源：官方 AGENTS.md / docs 明文化 + 运行时 `lib/types/*.d.ts` 可核对（DSH 0.1.0-rc.6）。
+> 这些规则运行时不一定试得出来，但违反会被官方 CI / 评审挂掉。提炼自社区 dsh-plugin-guide
+> （PerryLink）的 Hard rules，按我方惯例标注可核对位置。
+
+1. **注册即 effect**：所有贡献（事件/工具/服务/Slot/定时器）经 `ctx.on()` / `ctx.effect()` / 服务 `register()` 挂接并返回 disposer；卸载自动撤销。禁止模块级副作用、禁止 `apply()` 外的进程级注册。
+2. **waterfall 必须调 `next()`**：不调 = 故意短路下游（拦截/网关语义），见 events-hooks.md 示例。
+3. **模型可见 ⟺ 已记录**：新的模型可见输入必须新增会话事件（`SessionEventMap` 44 事件见 events-hooks.md）；"能看见但没记录"违反持久化契约。
+4. **跨边界 opaque id 用 branded**：会话/任务/审批等 id 从不裸 `string`（`Branded<B>` 来自 `dsh-brand`），字符串在进程/文件边界可被混淆。
+5. **merge-extensible union 禁用 `assertNever`**：`SessionEvent` 属后者——switch 必须落**文档化 default**；未知类型带 `ignorable: true` 否则日志拒读（required-on-read）。
+6. **配置全 Schema 化、fail loud**：`Config` 用 `@deepseek-ai/schemastery`（见 packaging.md §5），非法配置加载即失败，不静默吞。
+7. **不硬编码可调参数**：判据——cordis.yml 能否不改代码改值；能则做成配置字段。
+8. **文档纪律**：README 双语成对；工具描述/提示词即行为（模型可见）；非平凡变更加 Agent Note；事件 JSDoc 带 `@mode`。

@@ -14,8 +14,10 @@
 | `services.md` | 55 Host + 7 Client 服务清单（名 + 用途 + 关键方法）、`ctx.get` vs `inject`、重点服务用法 | 要消费能力服务（skills/tools/llm/timer/agentPresets/settings）时 |
 | `slots.md` | 42 个 Client Slot 清单、注册模式（single/list/keyed/chain）、常见入口建议 | 要往 Client UI 挂自定义界面 / 按钮 / 设置页时 |
 | `tools.md` | 动态 Tool 注册（`harness.defineTool`/`registerTool`）、~38 已有工具名、schema 与 execute 契约 | 自定义/注册 agent 可见工具时；查询已有工具名是否冲突 |
-| `packaging.md` | DSH 静态插件打包全流程（profile/bundle、`dsh.bundle.patch`、`cordis.patch.yml`、`dsh plugin`、四层加载、安装坑） | 要把插件装成 DSH profile bundle 时（DSH 侧格式） |
+| `packaging.md` | DSH 静态插件打包全流程（profile/bundle、`dsh.bundle.patch`、`cordis.patch.yml`、`dsh plugin`、四层加载、安装坑、身份/TS/Windows 坑、机制漂移警示） | 要把插件装成 DSH profile bundle 时（DSH 侧格式） |
 | `agent-plugins-1.0.md` | Agent Plugins 1.0 规范（plugin.json schema、skills/ 布局、mcp.json）、单目录双格式布局图 | 要写第二个格式（agent-plugins 兼容客户端）的声明时 |
+| `ecosystem.md` | 社区参考实现与工具索引（模板/脚手架/健康检查/踩坑档案/市场） | 要找真实范例、社区工具、发布渠道时 |
+| `sources.md` | 来源与核验总账（采集来源/日期/裁决记录/有效期） | 要核实事实来源、判断事实是否过期时 |
 
 ## 快速决策
 

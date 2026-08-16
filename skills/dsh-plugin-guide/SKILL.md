@@ -97,15 +97,15 @@ const SKILL_FILE = new URL('SKILL.md', SKILL_DIR)
 export function apply(ctx) {
   const raw = readFileSync(SKILL_FILE, 'utf-8')
   // 解析 frontmatter 的 name/description/whenToUse，正文为 content
-  const disposer = ctx.skills.register({
+  // 注册即 effect：register() 返回的 disposer 由框架在卸载时自动调用
+  ctx.effect(() => ctx.skills.register({
     name: meta.name,
     description: meta.description,
     whenToUse: meta.whenToUse,
     content,
     source: 'runtime',
     resourceBase: { kind: 'directory', path: fileURLToPath(SKILL_DIR) },
-  })
-  ctx.on('dispose', () => disposer?.())
+  }))
 }
 ```
 
@@ -126,6 +126,7 @@ dsh plugin --profile <profile> add <git-url|path|npm-name>
 - `npm pack --dry-run` 确认发布内容包含 `lib/`、`skills/`、`cordis.patch.yml`、`plugin.json`
 - `plugin.json` 的 name 与 npm 包名一致或至少不冲突
 - 技能正文里的相对引用（references/、scripts/）能经 resourceBase 解析
+- 发布前跑自检：`node skills/dsh-plugin-guide/scripts/verify.mjs`（关键文件 + 身份一致性 + 相对链接）
 
 ## 常见错误与排查
 
@@ -138,6 +139,11 @@ dsh plugin --profile <profile> add <git-url|path|npm-name>
 | Slot 注册失败 | Slot 名/协议（single/list/keyed/chain）没查 references/slots.md |
 | 技能没出现在目录 | lib/index.js 的 inject 缺 `skills`、SKILL.md frontmatter 缺 name/description、cordis.patch.yml 的 name 与包名不符 |
 | Agent Plugins 客户端不认 | plugin.json name 含 `--`/`..` 或大写；skills/ 子目录没有 SKILL.md |
+| `Property 'tools' does not exist on type 'Context'` | **cordis 双副本分裂**：scoped `@deepseek-ai/cordis` 与 unscoped `cordis` 混用，或从 `.pnpm` 副本解析 cordis；把 cordis 设为 peerDependency 对齐宿主（packaging.md §8） |
+| 装了旧版官方包 | npm `latest` 标签过期（如 dsh-tools latest=0.0.1-rc.1）——显式钉 `next` 标签版本（packaging.md §8） |
+| 产物含 `./x.ts` 导入、ESM 崩溃 | tsconfig 缺 `rewriteRelativeImportExtensions`（packaging.md §9） |
+
+> 发布前跑 `node skills/dsh-plugin-guide/scripts/verify.mjs` 自检；参考实现见 references/ecosystem.md；事实来源与核验日期见 references/sources.md。
 
 ## references/ 目录
 
@@ -149,7 +155,9 @@ dsh plugin --profile <profile> add <git-url|path|npm-name>
 | `references/services.md` | 55 Host + 7 Client 服务清单与用法 | 用服务前必读 |
 | `references/slots.md` | 42 个 Client Slot 清单与注册模式 | 写 UI 前必读 |
 | `references/tools.md` | 动态 Tool 注册、现有工具名清单、execute 契约 | 注册工具前必读 |
-| `references/packaging.md` | DSH 静态插件打包全流程（bundle/patch/安装/发布坑） | Step 2 前必读 |
+| `references/packaging.md` | DSH 静态插件打包全流程（bundle/patch/安装/发布坑、身份/TS/Windows 坑、机制漂移警示） | Step 2 前必读 |
 | `references/agent-plugins-1.0.md` | Agent Plugins 1.0 规范与双格式对应 | Step 2 前必读 |
+| `references/ecosystem.md` | 社区参考实现与工具索引（模板/脚手架/健康检查/市场） | 找真实范例、社区工具时 |
+| `references/sources.md` | 来源与核验总账（采集来源/日期/裁决记录/有效期） | 核实事实来源、判断是否过期时 |
 
 所有分册内容来自已核实的运行时清单与官方文档交叉核对；发现矛盾以真实运行时代码为准（分册内会标注"纠偏"）。

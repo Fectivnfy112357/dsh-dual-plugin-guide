@@ -91,3 +91,30 @@ export const Config = Schema.object({
 - `ctx.plugin(childPlugin)` 建子 Fiber：继承父 context、独立生命周期、随父卸载。
 - 手动停：`const fiber = ctx.plugin(myPlugin); await fiber.dispose()`。`dispose` 保证：①移除全部注册 ②递归卸载子插件 ③promise 在所有异步清理后 resolve。
 - HMR：加载 `@deepseek-ai/cordis-plugin-hmr` 后，编辑源码触发：卸载旧插件清注册 → 加载新代码 → 跑新 `apply`。
+
+## 8. 身份与依赖的坑（独立包必踩）
+
+- **cordis 双副本 / 双 Cordis 分裂**：构建期若从 `.pnpm` 副本解析 cordis，与 harness 的 vendored 副本是两个模块 → `declare module '@deepseek-ai/cordis'` 类型增强合并不了 → `Property 'tools' does not exist on type 'Context'`。**scoped `@deepseek-ai/cordis` 与 unscoped `cordis` 混用同样分裂**（dsh-tools 的类型只增强 scoped 版本）。独立包把 cordis 设为 `peerDependencies`（+ dev），版本对齐宿主。
+- **npm `latest` 标签可能是过期版本**：`@deepseek-ai/dsh-tools` 与 `@deepseek-ai/dsh-session-persistence-jsonl` 的 `latest` 停在 `0.0.1-rc.1`，`next` 才是 `0.1.0-rc.6`（2026-08-14 复核）；`create-dsh-plugin` latest=0.1.1；`dsh-core`/`dsh-sdk` 仍未发布（404）。裸 `npm i @deepseek-ai/dsh-tools` 会踩旧版——脚手架/脚本显式钉 `next` 标签版本。
+- **无作用域 `dsh` 是无关项目 node-dsh**（"A shell written in JavaScript"）——官方 CLI 包是 `@deepseek-ai/dsh`，别装错。
+- **官方 `@deepseek-ai/*` 早期未发布 npm**（rc 早期社区 bundle 靠 profile pnpm 闭包 flat fallback 注入，声明依赖反而解析失败）；rc.6 起公开。旧资料的两条时间线都要知道，按当时宿主版本取舍。
+
+## 9. TS 构建四坑（TS 插件包）
+
+- tsconfig 实测可用组合：`module: esnext` + `moduleResolution: bundler` + `allowImportingTsExtensions: true`（否则 TS5097）+ `rewriteRelativeImportExtensions: true`（否则产物残留 `./x.ts` 导入 → 运行时 ESM 崩溃）+ `lib: ["ES2024"]` + `outDir: lib` + `declarationDir: lib/types`；用 `Buffer`/`node:` 时显式 `"types": ["node"]`。
+- **`tsc` 报错仍会 emit 产物**（`noEmitOnError` 默认 false）——构建脚本必须 `tsc ... || exit 1` 或加 `--noEmitOnError`；发布前 `grep -rE "from './[^']+\.ts'" lib/` 验证无 `.ts` 残留。
+- `main`/`types` 声明 `lib/...` 但 tsconfig 无 `outDir` → 产物落到 src 旁，运行时找不到入口。
+- git 安装跑 `prepare` 要**自包含**：不假设 monorepo 兄弟目录、不跑类型检查，用专用 tsdown 配置转译 `src/`；`pnpm pack --dry-run --json` 检查最终文件清单。
+
+## 10. Windows 实测坑
+
+- **junction**：`ln -s` 与 `cmd mklink /J`（MSYS 参数转换）都失败，**PowerShell `New-Item -ItemType Junction` 稳定可用**；`@types` 不能整体 junction（内部是 pnpm 符号链接，tsc 无法穿透），要直达 `.pnpm/@types+node@<ver>/node_modules/@types/node` 真实路径。
+- `path.resolve()` 返回反斜杠，与正斜杠路径比较恒 false（路径逃逸误报）；比较前两侧都 `resolve()` 或统一分隔符。
+- vitest：盘符必须大写（`C:/`，小写 `c:/` 报 "no tests"）；`| tail` 会截掉汇总行，用 `grep -E 'Test Files|Tests '` 取结果。
+- `DSH_PERMISSION_MODE=danger-full-access` 是**高风险模式**（Windows 无沙箱后端时仅此可启动，且禁用审批提示）——只用于可信本地开发机，不要写进模板/CI/共享机器。
+- `DSH_*` 特殊环境变量必须由启动环境传入，放 `~/.dsh/.env` 会启动报错；凭据在 `$DSH_HOME/.credentials.yaml`。
+
+## 11. 机制漂移警示（照旧文档会踩）
+
+- **repository-plugin（`.dsh-plugin` 目录）0809 推出、0811 已从仓库移除**：官方文档残留 "repository plugins land in global layer" 等旧表述会误导。当前只有 **bundle**（`dsh.bundle.patch`）与**纯 cordis** 两条安装通道——以当前宿主运行时为准。
+- 服务批量改名（如 `httpServer→webServer`、`tasks→jobs`、`bash→shell`）：写插件前用运行时 `cordis_inspect_*` / services.md 核对当前名，不要照旧文档。

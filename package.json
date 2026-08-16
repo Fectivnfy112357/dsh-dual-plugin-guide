@@ -18,6 +18,14 @@
     "LICENSE"
   ],
   "license": "MIT",
+  "peerDependencies": {
+    "@deepseek-ai/dsh": "0.1.0-rc.6"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/dsh": {
+      "optional": true
+    }
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Fectivnfy112357/dsh-plugin-guide.git"
