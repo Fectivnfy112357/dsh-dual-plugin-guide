@@ -67,8 +67,21 @@ DSH 层在 `dsh-tool-cordis` 保留手写镜像（`lib/types/fiber-state.d.ts` �
 
 - 全树 grep 验证：**不存在 `Builtin` 消息源枚举，也不存在 `harness` 服务**（`ctx.get('harness')` 读不到）。
 - 真 `Builtin` 是 Cordis Inspect 的**类别**（Host 7 / Client 5，如下），枚举动态插件沙箱内可用的 JS 全局符号。
-- `harness` 是 Host 侧一个**沙箱全局对象**（构造于 `dsh-cordis-host-runner/lib/index.js:1220`
-  `createSandbox(id, harnessExtras)`），用于面向模型注册工具与面向 Client 的 JSON RPC。
+- `harness` 是 Host 侧一个**vm 沙箱全局对象**，只在 `node:vm` 沙箱里挂出——**不是**进程全局，也不是
+  静态插件可见的注入服务。出处：
+  - 发布版：`dsh-cordis-host-runner/lib/index.js:1220` `createSandbox(id, harnessExtras)`
+  - 源码：`packages/extensions/cordis-host-runner/src/sandbox.ts:129` `createSandbox`
+  - 调用方：`packages/extensions/cordis-host-runner/src/index.ts:898` `startHost` 仅在
+    `hostCode !== undefined` 时构造该沙箱并 `runInContext`（`sandbox.ts:227`）。
+- **守卫层等价**：沙箱内的 `harness.registerTool(ctx, tool)` 实际是
+  `ctx.tools.register(tool)` 的 marker-guarded 包装（`guard.ts:626-629`）；`harness.defineTool(def)`
+  是 `defineTool` 之上加 VM 域 schema 规范化与 JSON 跨域克隆（`guard.ts:551-592`）。
+  静态插件直接 `ctx.tools.register(defineTool({...}))` 即可，不需要任何 harness 包装。
+
+> **静态插件的常见错配**：在 `apply` 里 `if (typeof globalThis.harness === 'undefined')` 然后抛错，
+> 期望 DSH 暴露 `harness` 全局。DSH **不会**——`cordis-plugin-loader` 用普通 ESM `import()` 装入静态插件，
+> 跑在主进程里，`globalThis.harness` 永远是 `undefined`。正确做法见 `tools.md` §1 与官方
+> `docs/user/develop/basic/tool.md` 的 `Build a tool` 教程。
 
 ## 7. Builtin 清单
 

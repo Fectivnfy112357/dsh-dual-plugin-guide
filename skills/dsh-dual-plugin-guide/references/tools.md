@@ -1,20 +1,67 @@
 # 动态 Tool（tools.md）
 
-> 依据 runtime-inventory.md（权威）与 static-plugin-reference.md。工具注册路径：
-> `ctx.tools.register(defineTool({…}))`（`dsh-tools/lib/index.js:2755`）；`defineTool` 定义于 `dsh-tools/lib/index.js:836` / `types/schema.js:274`。
+> 依据 runtime-inventory.md（权威）与 static-plugin-reference.md。**静态插件**工具注册路径：
+> `ctx.tools.register(defineTool({…}))`（`dsh-tools/lib/index.js:2755` / 源码 `packages/core/tools/src/index.ts:65`）；
+> `defineTool` 定义于 `dsh-tools/lib/index.js:836` / 源码 `packages/core/tools/src/schema.ts:545`。
+> 沙箱侧的 `harness.defineTool` / `harness.registerTool` 仅对**动态插件**的 `hostCode` 可见——见 §2 的 ⚠️。
 
-## 1. 注册属于当前 Fiber，自动清理
+## 1. 静态插件的标准注册路径
 
-`ctx.tools.register(...)` 与沙箱侧的 `harness.registerTool(...)` 均为 effect 式注册：**dispose fiber 即自动反注册**，
+> 这是**静态插件**该用的模式（`cordis.bundle.patch` / `@deepseek-ai/dsh-bundle-*` 装入的包）。官方最小示例见
+> `packages/extensions/.../docs/user/develop/basic/tool.md`；本节与之一致。
+
+`ctx.tools.register(defineTool({...}))` 是 effect 式注册：**dispose fiber 即自动反注册**，
 schema 自动进入 system-prompt 组装。热替换 = 卸载旧 effect + 注册新工具，注册后不 mutate schema / 替换回调。
 
-## 2. `harness.defineTool` / `harness.registerTool`（沙箱全局）
+**最小可运行模板**（与官方 `Build a tool` 教程同形）：
 
-Host 沙箱全局 `harness`（构造 `dsh-cordis-host-runner/lib/index.js:1220`）提供：
-`harness.handle(method, handler)`、`harness.defineTool(def)`、`harness.registerTool(ctx, tool)`。
-`defineTool` 推断并校验模型 `arguments`；`registerTool` 把工具挂到当前 fiber 的 `ctx.tools`。
+```ts
+import type { Context } from '@deepseek-ai/cordis'
+import { defineTool } from '@deepseek-ai/dsh-tools'   // ← 直接 import，不要走 globalThis.harness
+
+export const name = 'greet-tool'
+export const inject = ['tools']                       // ← 让 cordis 等 ctx.tools 就绪再 apply
+
+export function apply(ctx: Context) {
+  ctx.tools.register(defineTool({
+    name: 'greet',
+    description: 'Greet someone by name.',
+    parameters: { name: { type: 'string', required: true, description: 'the name' } },
+    output: { schema: { type: 'string' }, render: (_args, value) => [{ type: 'text', text: value }] },
+    async execute(args) { return `Hello, ${args.name}!` },
+  }))
+}
+```
+
+关键点：
+- `defineTool` 来自 `@deepseek-ai/dsh-tools`（`schema.ts:545`），与 `globalThis.harness` 无关。
+- `inject = ['tools']` 声明对 `ctx.tools` 服务的硬依赖；缺它就 `ctx.tools` undefined。
+- 卸载时 cordis 自动反注册：要么裸 `ctx.tools.register(defineTool(...))`，要么 `ctx.effect(() => ctx.tools.register(defineTool(...)))` —— **不要**两者都包一遍。
+
+## 2. `harness.defineTool` / `harness.registerTool`（**仅**动态插件 host 半的 vm 沙箱）
+
+> ⚠️ **本节是动态插件（`cordis_define` 装入的 `hostCode`）在 `node:vm` 沙箱内才能用的入口。**
+> 静态插件（`@deepseek-ai/dsh-bundle-*` / `cordis.bundle.patch` 安装的 npm 包）**没有**
+> `globalThis.harness`，读不到 `harness.defineTool` / `harness.registerTool`。
+> 静态插件请用 §1 的 `ctx.tools.register(defineTool({...}))`，别照抄本节代码——否则
+> `apply` 一进来 `globalThis.harness is undefined` 就抛错，DSH 直接拒启该 plugin。
+> 真实反例：`dsh-agent-dock` 一开始按本节写法挂了 `globalThis.harness` guard，
+> `dsh web` 启不来报 `harness sandbox global unavailable (defineTool/registerTool missing)`。
+
+**边界**：`harness` 全局只在 `createSandbox`（发布版 `dsh-cordis-host-runner/lib/index.js:1220`；
+源码 `packages/extensions/cordis-host-runner/src/sandbox.ts:129`）构造的 `vm.createContext` 沙箱里挂出，
+整个调用链 `startHost`（`index.ts:898`）→ `evaluateHostCode`（`sandbox.ts:227`，`runInContext`）
+→ `startHostHalf`（`lifecycle.ts:22`）只在 `hostCode !== undefined` 时触发；
+静态插件加载走 `cordis-plugin-loader` 的 `import()`，不进 vm，`globalThis.harness` 始终 `undefined`。
+
+**实质等价**：沙箱内 `harness.registerTool(ctx, tool)` 干的事就是
+`ctx.tools.register(tool)`（守卫版 `packages/extensions/cordis-host-runner/src/guard.ts:626-629`，
+外加 JSON 跨域克隆与 schema 规范化），`harness.defineTool(def)` 实质是
+`defineTool` 之上加 VM 域 schema 规范化（`guard.ts:551-592`）。沙箱的两层包装**只**为
+应对 model 在 vm 域写代码的跨域场景；你写的 TS/JS 静态插件用不到。
 
 ```js
+// 仅用于 cordis_define 的 hostCode 体内；静态插件别这样写。
 harness.registerTool(ctx, harness.defineTool({
   name: 'greet',
   description: 'Greet someone by name.',

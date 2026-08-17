@@ -102,11 +102,17 @@ ctx.skills.registerProvider(create)
 ```
 
 ### tools
-```js
+```ts
+import { defineTool } from '@deepseek-ai/dsh-tools'   // 直接 import，不是 globalThis.harness
+
+export const inject = ['tools']                       // 等 ctx.tools 就绪
 ctx.tools.register(defineTool({ name, description, parameters, output, execute })) // 返回 disposer；见 tools.md
 ctx.tools.schemas(scope?)   // 模型可见 schema（仅 name/description/parameters）
 ctx.tools.get(name, scope?) / ctx.tools.guard((exec)=>string|undefined) / restrict(filter)
 ```
+
+> 完整最小模板见 `tools.md` §1；与官方 `docs/user/develop/basic/tool.md` 一致。
+> 不要把 §5 这一行误读成"`harness` 是服务"——`harness` 是 vm 沙箱全局，不是 `ctx.get` 能读的服务。
 
 ### llm / timer / agentPresets / settings
 ```js
